@@ -1,0 +1,19 @@
+{
+  "name": "slack-app-reviews",
+  "version": "0.0.1",
+  "description": "A Slack command to retrieve app store reviews",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mike Nikles",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.14.1",
+    "express": "^4.13.3",
+    "lodash": "^3.10.1",
+    "parse": "^1.6.9",
+    "request": "^2.67.0",
+    "underscore": "^1.8.3"
+  }
+}
