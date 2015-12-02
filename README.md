@@ -28,7 +28,8 @@ You can clone this repository and host the code on your own.
 
 ## Requirements
 
-Install `node`
+* Install `node`
+* Create a www.parse.com account
 
 ## Installation
 
@@ -38,6 +39,12 @@ Install `node`
 
 See `config.json`.
 * Adjust the `maxRating`. Default: 5 (all reviews)
+
+Parse
+* Set the following environment variables:
+ * PARSE_APP_ID: Application ID
+ * PARSE_APP_KEY: JavaScript Key
+* You can find these values under Settings / Keys in your Parse account
 
 ## Run
 
