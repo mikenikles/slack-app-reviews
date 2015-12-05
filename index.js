@@ -112,7 +112,11 @@ var listTeamSettings = function(teamDomain, successCallback, errorCallback) {
       if (results.length === 0) {
         successCallback('We don\'t yet have any app IDs for your team. Please add some app IDs from iTunes Connect like so: `/<your-slack-command> add <comma separated app ID list>`. For example: `/appreview add 123,456`');
       } else if (results.length === 1) {
-        successCallback('Your team has the following app IDs configured: ' + results[0].get('appIdList'));
+        var appIdArray = results[0].get('appIdList');
+        var message = _.reduce(appIdArray, function(result, appId) {
+          return result || '' + '`' + appId + '`\n';
+        });
+        successCallback('Your team has the following app IDs configured: ' + message);
       } else {
         console.log('0 or more than 1 settings entry for team: ' + teamDomain);
         errorCallback('Something went wrong... Please try again');
