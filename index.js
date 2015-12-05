@@ -170,7 +170,7 @@ var setTeamSettingsConfigValue = function(teamDomain, configKey, configValue, su
   });
 };
 
-var processCommand = function(teamDomain, parameters, successCallback, errorCallback) {
+var processCommand = function(slackCommand, teamDomain, parameters, successCallback, errorCallback) {
   var parametersArray = parameters.split(' ');
   var command = parametersArray[0];
   if (command === 'add') {
@@ -182,6 +182,16 @@ var processCommand = function(teamDomain, parameters, successCallback, errorCall
     var configKey = parametersArray[1].split('=')[0];
     var configValue = parametersArray[1].split('=')[1];
     setTeamSettingsConfigValue(teamDomain, configKey, configValue, successCallback, errorCallback);
+  } else if (command === 'help') {
+    var helpMessage = 'Welcome to `slack-app-reviews`!\n\n' +
+      'Usage: ' + slackCommand + ' <command>\n\n' +
+      'where <command> is one of:\n' +
+      '    add, list, set, help\n\n' +
+      slackCommand + ' add <list of app IDs>    A comma separated list of app IDs from iTunes Connect\n' +
+      slackCommand + ' list                     Lists all configured app IDs\n' +
+      slackCommand + ' set <configKey>=<value>  where <configKey> is `minRating` or `maxRating`. A value between 1 and 5, inclusive\n' +
+      slackCommand + ' help                     Help\n';
+    successCallback(helpMessage);
   }
   // TODO: Add more commands: 'reset', 'remove'
 };
@@ -202,9 +212,9 @@ app.use(bodyParser.urlencoded({
 app.post('/app-review', function(req, res) {
   var teamDomain = req.body.team_domain;
   var user = req.body.user_name;
-  var command = req.body.command;
+  var slackCommand = req.body.command;
   var parameters = req.body.text;
-  console.log('Team: ' + teamDomain + '; user: ' + user + '; command: ' + command + '; parameters: ' + parameters);
+  console.log('Team: ' + teamDomain + '; user: ' + user + '; Slack command: ' + slackCommand + '; parameters: ' + parameters);
 
   // Load team settings
   var TeamSettings = Parse.Object.extend('TeamSettings');
@@ -216,7 +226,7 @@ app.post('/app-review', function(req, res) {
       if (results.length === 0) {
         // If parameters were provided, process them
         if (parameters && parameters.length > 0) {
-          processCommand(teamDomain, parameters, function(message) {
+          processCommand(slackCommand, teamDomain, parameters, function(message) {
             sendSlackResponse(res, message);
           }, function(error) {
             sendSlackResponse(res, error);
@@ -229,7 +239,7 @@ app.post('/app-review', function(req, res) {
       } else if (results.length === 1) {
         // If parameters were provided, process them
         if (parameters && parameters.length > 0) {
-          processCommand(teamDomain, parameters, function(message) {
+          processCommand(slackCommand, teamDomain, parameters, function(message) {
             sendSlackResponse(res, message);
           }, function(error) {
             sendSlackResponse(res, error);
