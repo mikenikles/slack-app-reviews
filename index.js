@@ -237,8 +237,7 @@ app.post('/app-review', function(req, res) {
             sendSlackResponse(res, error);
           });
         } else {
-          console.log('No command provided');
-          sendSlackResponse(res, 'Please provide a command, such as `/appreview add 123,456,789`');
+          sendSlackResponse(res, 'Hey there ' + user + '! We don\'t yet have any app IDs for your team. Please add some app IDs from iTunes Connect like so: `/<your-slack-command> add <comma separated app ID list>`. For example: `/appreview add 123,456`');
         }
       // Exactly one team settings row - perfect
       } else if (results.length === 1) {
