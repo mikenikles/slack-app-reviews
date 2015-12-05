@@ -41,9 +41,9 @@ var loadReviewFromItunes = function(teamSettings, successCallback, errorCallback
           var randomReviewRatingStars = '';
           for (var i = 1; i <= 5; i++) {
             if (i <= randomReviewRating) {
-              randomReviewRatingStars += '&#9733;';
+              randomReviewRatingStars += '★';
             } else {
-              randomReviewRatingStars += '&#9734;';
+              randomReviewRatingStars += '☆';
             }
           }
           var randomReviewLabel = randomReview.content.label;
