@@ -22,6 +22,10 @@ This is a one-time setup and takes less than 5 minutes:
 
 In any Slack channel, type `/appreview` and follow the instructions.
 
+## Help
+
+Use `/appreview help` to see what commands are available.
+
 # Host it by yourself
 
 You can clone this repository and host the code on your own.
