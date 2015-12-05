@@ -36,7 +36,18 @@ var loadReviewFromItunes = function(teamSettings, successCallback, errorCallback
         if (reviews.length > 0) {
           // Woohoo, let's share some random review
           var randomIndex = Math.floor(Math.random() * (reviews.length - 0)) + 0;
-          var slackMessage = appName + '\n' + reviews[randomIndex].content.label;
+          var randomReview = reviews[randomIndex];
+          var randomReviewRating = randomReview['im:rating'].label;
+          var randomReviewRatingStars = '';
+          for (var i = 1; i <= 5; i++) {
+            if (i <= randomReviewRating) {
+              randomReviewRatingStars += '&#9733;';
+            } else {
+              randomReviewRatingStars += '&#9734;';
+            }
+          }
+          var randomReviewLabel = randomReview.content.label;
+          var slackMessage = appName + '\n' + randomReviewRatingStars + ': ' + randomReviewLabel;
           successCallback(slackMessage);
         } else {
           var errorMessage = 'No reviews for app: ' + (appName ? appName : randomAppId);
