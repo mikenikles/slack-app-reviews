@@ -114,7 +114,7 @@ var listTeamSettings = function(teamDomain, successCallback, errorCallback) {
       } else if (results.length === 1) {
         var appIdArray = results[0].get('appIdList');
         var message = _.reduce(appIdArray, function(result, appId) {
-          return result || '' + '`' + appId + '`\n';
+          return result + '\n' + appId;
         });
         successCallback('Your team has the following app IDs configured: ' + message);
       } else {
