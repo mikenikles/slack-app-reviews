@@ -184,13 +184,13 @@ var processCommand = function(slackCommand, teamDomain, parameters, successCallb
     setTeamSettingsConfigValue(teamDomain, configKey, configValue, successCallback, errorCallback);
   } else if (command === 'help') {
     var helpMessage = 'Welcome to `slack-app-reviews`!\n\n' +
-      'Usage: ' + slackCommand + ' <command>\n\n' +
-      'where <command> is one of:\n' +
-      '    add, list, set, help\n\n' +
-      slackCommand + ' add <list of app IDs>    A comma separated list of app IDs from iTunes Connect\n' +
-      slackCommand + ' list                     Lists all configured app IDs\n' +
-      slackCommand + ' set <configKey>=<value>  where <configKey> is `minRating` or `maxRating`. A value between 1 and 5, inclusive\n' +
-      slackCommand + ' help                     Help\n';
+      'Usage: `' + slackCommand + ' <command>`\n\n' +
+      'where `<command>` is one of:\n' +
+      '    `add`, `list`, `set`, `help`\n\n' +
+      '`' + slackCommand + ' add <list of app IDs>    ` A comma separated list of app IDs from iTunes Connect\n' +
+      '`' + slackCommand + ' list                     ` Lists all configured app IDs\n' +
+      '`' + slackCommand + ' set <configKey>=<value>  ` where <configKey> is `minRating` or `maxRating`. A value between 1 and 5, inclusive\n' +
+      '`' + slackCommand + ' help                     ` Help\n';
     successCallback(helpMessage);
   }
   // TODO: Add more commands: 'reset', 'remove'
