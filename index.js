@@ -6,7 +6,10 @@ var Parse = require('parse/node');
 var config = require('./config.json');
 var configKeyWhitelist = ['minRating', 'maxRating'];
 
-var loadReviewFromItunes = function(appIdList, successCallback, errorCallback) {
+var loadReviewFromItunes = function(teamSettings, successCallback, errorCallback) {
+  var appIdList = teamSettings.get('appIdList');
+  var minRating = teamSettings.get('minRating') || 1;
+  var maxRating = teamSettings.get('maxRating') || 5;
   var randomAppIndex = Math.floor(Math.random() * (appIdList.length));
   var randomAppId = appIdList[randomAppIndex];
   // Query iTunes
@@ -18,7 +21,11 @@ var loadReviewFromItunes = function(appIdList, successCallback, errorCallback) {
         var reviews = _.filter(entries, function(entry) {
           if (entry['im:rating']) {
             // All but the first entry have that property.
-            return entry['im:rating'].label <= config.maxRating ? entry : null;
+            if (entry['im:rating'].label >= minRating && entry['im:rating'].label <= maxRating) {
+              return entry;
+            } else {
+              return null;
+            }
           } else {
             // Voila, the first entry is the app info
             appName = entry['im:name'].label;
@@ -224,7 +231,7 @@ app.post('/app-review', function(req, res) {
             // No settings yet for the given team domain
             sendSlackResponse(res, 'Hey there ' + user + '! We don\'t yet have any app IDs for your team. Please add some app IDs from iTunes Connect like so: `/<your-slack-command> add <comma separated app ID list>`. For example: `/appreview add 123,456`');
           } else {
-            loadReviewFromItunes(appIdList, function(message) {
+            loadReviewFromItunes(teamSettings, function(message) {
               sendSlackResponse(res, message);
             }, function(error) {
               sendSlackResponse(res, error);
