@@ -59,7 +59,7 @@ var loadReviewFromItunes = function(teamSettings, successCallback, errorCallback
   );
 };
 
-var persistTeamSettings = function(teamDomain, appIdList, successCallback, errorCallback) {
+var persistTeamSettings = function(slackCommand, teamDomain, appIdList, successCallback, errorCallback) {
   var TeamSettings = Parse.Object.extend('TeamSettings');
   var query = new Parse.Query(TeamSettings);
   query.equalTo('teamDomain', teamDomain);
@@ -72,7 +72,7 @@ var persistTeamSettings = function(teamDomain, appIdList, successCallback, error
         newTeamSettings.set('appIdList', appIdList);
         newTeamSettings.save(null, {
           success: function(persistedTeamSettings) {
-            successCallback('Success! Your app IDs are persisted. From now on, use `/<your-slack-command>` to get a random review. For example: `/appreview`');
+            successCallback('Success! Your app IDs are persisted. From now on, use `' + slackCommand + '` to get a random review.');
           },
           error: function(persistedTeamSettings, error) {
             // Execute any logic that should take place if the save fails.
@@ -88,7 +88,7 @@ var persistTeamSettings = function(teamDomain, appIdList, successCallback, error
           results[0].addUnique('appIdList', appId);
         }
         results[0].save();
-        successCallback('Success! Your app IDs are persisted. From now on, use `/<your-slack-command>` to get a random review. For example: `/appreview`');
+        successCallback('Success! Your app IDs are persisted. From now on, use `' + slackCommand + '` to get a random review.');
       // More than 1 settings entry for the given team... problem
       } else {
         console.log('More than 1 settings entry for team: ' + teamDomain);
@@ -102,7 +102,7 @@ var persistTeamSettings = function(teamDomain, appIdList, successCallback, error
   });
 };
 
-var listTeamSettings = function(teamDomain, successCallback, errorCallback) {
+var listTeamSettings = function(slackCommand, teamDomain, successCallback, errorCallback) {
   // Load team settings
   var TeamSettings = Parse.Object.extend('TeamSettings');
   var query = new Parse.Query(TeamSettings);
@@ -110,7 +110,7 @@ var listTeamSettings = function(teamDomain, successCallback, errorCallback) {
   query.find({
     success: function(results) {
       if (results.length === 0) {
-        successCallback('We don\'t yet have any app IDs for your team. Please add some app IDs from iTunes Connect like so: `/<your-slack-command> add <comma separated app ID list>`. For example: `/appreview add 123,456`');
+        successCallback('We don\'t yet have any app IDs for your team. Please add some app IDs from iTunes Connect like so: `' + slackCommand + ' add <comma separated app ID list>`. For example: `' + slackCommand + ' add 123,456`');
       } else if (results.length === 1) {
         var appIdArray = _.sortBy(results[0].get('appIdList'));
         var message = _.reduce(appIdArray, function(result, appId) {
@@ -179,9 +179,9 @@ var processCommand = function(slackCommand, teamDomain, parameters, successCallb
   var command = parametersArray[0];
   if (command === 'add') {
     var appIdList = parametersArray[1].split(',');
-    persistTeamSettings(teamDomain, appIdList, successCallback, errorCallback);
+    persistTeamSettings(slackCommand, teamDomain, appIdList, successCallback, errorCallback);
   } else if (command === 'list') {
-    listTeamSettings(teamDomain, successCallback, errorCallback);
+    listTeamSettings(slackCommand, teamDomain, successCallback, errorCallback);
   } else if (command === 'set') {
     var configKey = parametersArray[1].split('=')[0];
     var configValue = parametersArray[1].split('=')[1];
