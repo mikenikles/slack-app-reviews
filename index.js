@@ -237,7 +237,7 @@ app.post('/app-review', function(req, res) {
             sendSlackResponse(res, error);
           });
         } else {
-          sendSlackResponse(res, 'Hey there ' + user + '! We don\'t yet have any app IDs for your team. Please add some app IDs from iTunes Connect like so: `/<your-slack-command> add <comma separated app ID list>`. For example: `/appreview add 123,456`');
+          sendSlackResponse(res, 'Hey there ' + user + '! We don\'t yet have any app IDs for your team. Please add some app IDs from iTunes Connect like so: `' + slackCommand + ' add <comma separated app ID list>`. For example: `' + slackCommand + ' add 123,456`');
         }
       // Exactly one team settings row - perfect
       } else if (results.length === 1) {
@@ -254,7 +254,7 @@ app.post('/app-review', function(req, res) {
           var appIdList = teamSettings.get('appIdList');
           if (appIdList && appIdList.length === 0) {
             // No settings yet for the given team domain
-            sendSlackResponse(res, 'Hey there ' + user + '! We don\'t yet have any app IDs for your team. Please add some app IDs from iTunes Connect like so: `/<your-slack-command> add <comma separated app ID list>`. For example: `/appreview add 123,456`');
+            sendSlackResponse(res, 'Hey there ' + user + '! We don\'t yet have any app IDs for your team. Please add some app IDs from iTunes Connect like so: `' + slackCommand + ' add <comma separated app ID list>`. For example: `' + slackCommand + ' add 123,456`');
           } else {
             loadReviewFromItunes(teamSettings, function(message) {
               sendSlackResponse(res, message);
