@@ -1,5 +1,4 @@
 {
-  "maxRating": 5,
   "itunesApi": {
     "baseUrl": "https://itunes.apple.com/rss/customerreviews/id=",
     "responseFormat": "json"
