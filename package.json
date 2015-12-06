@@ -15,5 +15,11 @@
     "parse": "^1.6.9",
     "request": "^2.67.0",
     "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "expect.js": "^0.3.1",
+    "mocha": "^2.3.4",
+    "superagent": "^1.5.0",
+    "supertest": "^1.1.0"
   }
 }

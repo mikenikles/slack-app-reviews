@@ -81,7 +81,7 @@ var persistTeamSettings = function(slackCommand, teamDomain, appIdList, successC
             errorCallback('Failed to create new object, with error code: ' + error.message);
           }
         });
-      // Settings available, update
+        // Settings available, update
       } else if (results.length === 1) {
         for (var index = 0; index < appIdList.length; index++) {
           var appId = appIdList[index];
@@ -89,7 +89,7 @@ var persistTeamSettings = function(slackCommand, teamDomain, appIdList, successC
         }
         results[0].save();
         successCallback('Success! Your app IDs are persisted. From now on, use `' + slackCommand + '` to get a random review.');
-      // More than 1 settings entry for the given team... problem
+        // More than 1 settings entry for the given team... problem
       } else {
         console.log('More than 1 settings entry for team: ' + teamDomain);
         errorCallback('Something went wrong... Please try again');
@@ -142,26 +142,32 @@ var setTeamSettingsConfigValue = function(teamDomain, configKey, configValue, su
         newTeamSettings.set('appIdList', []);
         if (_.contains(configKeyWhitelist, configKey)) {
           newTeamSettings.set(configKey, configValue);
+          newTeamSettings.save(null, {
+            success: function(persistedTeamSettings) {
+              successCallback('Success! Your settings are persisted.');
+            },
+            error: function(persistedTeamSettings, error) {
+              // Execute any logic that should take place if the save fails.
+              // error is a Parse.Error with an error code and message.
+              console.log('Failed to create new object, with error code: ' + error.message);
+              errorCallback('Failed to create new object, with error code: ' + error.message);
+            }
+          });
+        } else {
+          console.log('Invalid config key provided: ' + configKey + '; team: ' + teamDomain);
+          errorCallback('Invalid config key.')
         }
-        newTeamSettings.save(null, {
-          success: function(persistedTeamSettings) {
-            successCallback('Success! Your settings are persisted.');
-          },
-          error: function(persistedTeamSettings, error) {
-            // Execute any logic that should take place if the save fails.
-            // error is a Parse.Error with an error code and message.
-            console.log('Failed to create new object, with error code: ' + error.message);
-            errorCallback('Failed to create new object, with error code: ' + error.message);
-          }
-        });
-      // Settings available, update
+        // Settings available, update
       } else if (results.length === 1) {
         if (_.contains(configKeyWhitelist, configKey)) {
           results[0].set(configKey, configValue);
+          results[0].save();
+          successCallback('Success! Your settings are persisted.');
+        } else {
+          console.log('Invalid config key provided: ' + configKey + '; team: ' + teamDomain);
+          errorCallback('Invalid config key.')
         }
-        results[0].save();
-        successCallback('Success! Your settings are persisted.');
-      // More than 1 settings entry for the given team... problem
+        // More than 1 settings entry for the given team... problem
       } else {
         console.log('More than 1 settings entry for team: ' + teamDomain);
         errorCallback('Something went wrong... Please try again');
@@ -214,6 +220,35 @@ app.use(bodyParser.urlencoded({
   extended: false
 }));
 
+app.get('/test', function(req, res) {
+  res.send();
+});
+
+app.delete('/remove-test-settings', function(req, res) {
+  var teamDomain = req.body.team_domain;
+  var TeamSettings = Parse.Object.extend('TeamSettings');
+  var query = new Parse.Query(TeamSettings);
+  query.equalTo('teamDomain', teamDomain);
+  query.find({
+    success: function(results) {
+      if (results.length > 0) {
+        results[0].destroy({
+          success: function() {
+            res.send('Team settings successfully deleted.');
+          },
+          error: function(teamSettings, error) {
+            res.send('Team settings could not be deleted due to: ' + error);
+          }
+        });
+      }
+    },
+    error: function(error) {
+      console.log('Cannot delete team settings for team: ' + teamDomain + '. Error: ' + error);
+      res.send('Something went wrong... Please try again');
+    }
+  });
+});
+
 app.post('/app-review', function(req, res) {
   var teamDomain = req.body.team_domain;
   var user = req.body.user_name;
@@ -239,7 +274,7 @@ app.post('/app-review', function(req, res) {
         } else {
           sendSlackResponse(res, 'Hey there ' + user + '! We don\'t yet have any app IDs for your team. Please add some app IDs from iTunes Connect like so: `' + slackCommand + ' add <comma separated app ID list>`. For example: `' + slackCommand + ' add 123,456`');
         }
-      // Exactly one team settings row - perfect
+        // Exactly one team settings row - perfect
       } else if (results.length === 1) {
         // If parameters were provided, process them
         if (parameters && parameters.length > 0) {
@@ -248,7 +283,7 @@ app.post('/app-review', function(req, res) {
           }, function(error) {
             sendSlackResponse(res, error);
           });
-        // If no paramters were provided, load a review
+          // If no paramters were provided, load a review
         } else {
           var teamSettings = results[0];
           var appIdList = teamSettings.get('appIdList');
@@ -275,6 +310,7 @@ app.post('/app-review', function(req, res) {
   });
 });
 
+
 var port = process.env.PORT || 3000;
 var server = app.listen(port, function() {
   Parse.initialize(process.env.PARSE_APP_ID, process.env.PARSE_APP_KEY);
@@ -284,3 +320,5 @@ var server = app.listen(port, function() {
 
   console.log('Example app listening at http://%s:%s', host, port);
 });
+
+module.exports = app;
