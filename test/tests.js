@@ -40,10 +40,17 @@ describe('API', function() {
       });
   });
 
-  it('returns 200 status', function(done) {
+  it('returns 200 status for the help command', function(done) {
+    var testRequest = _.clone(testRequestTemplate);
+    testRequest.text = 'help';
     request
-      .get('/test')
-      .expect(200, done);
+      .post('/app-review')
+      .send(testRequest)
+      .expect(function(res) {
+        res.body.response_type = 'in_channel';
+        expect(res.body.text).to.contain('Welcome');
+      })
+      .end(done);
   });
 
   it('cannot find team settings', function(done) {
