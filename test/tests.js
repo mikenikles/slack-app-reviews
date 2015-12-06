@@ -35,7 +35,6 @@ describe('API', function() {
       })
       .expect(200, 'Team settings successfully deleted.')
       .end(function(err, res) {
-        console.log('------------------------------------');
         if (err) throw err;
         done();
       });
@@ -126,6 +125,25 @@ describe('API', function() {
       .expect(function(res) {
         res.body.response_type = 'in_channel';
         expect(res.body.text).to.be(404);
+      })
+      .end(done);
+  });
+
+
+  it('returns a message when no app review is available', function(done) {
+    var nockiTunes = nock('https://itunes.apple.com')
+      .get('/rss/customerreviews/id=400274934/json')
+      .reply(200, {
+        feed: {
+          entry: []
+        }
+      });
+    request
+      .post('/app-review')
+      .send(testRequestTemplate)
+      .expect(function(res) {
+        res.body.response_type = 'in_channel';
+        expect(res.body.text).to.be('No reviews for app: 400274934');
       })
       .end(done);
   });
