@@ -4,10 +4,27 @@
   "description": "A Slack command to retrieve app store reviews",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/mocha/bin/mocha --require blanket --reporter mocha-lcov-reporter | ./node_modules/coveralls/bin/coveralls.js",
+    "test-locally": "./node_modules/mocha/bin/mocha",
+    "test-html-coverage": "rm coverage.html; ./node_modules/mocha/bin/mocha --require blanket -R html-cov > coverage.html; open coverage.html"
   },
   "author": "Mike Nikles",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mikenikles/slack-app-reviews/issues"
+  },
+  "homepage": "https://github.com/mikenikles/slack-app-reviews",
+  "config": {
+    "blanket": {
+      "pattern": [
+        ""
+      ],
+      "data-cover-never": [
+        "node_modules",
+        "test"
+      ]
+    }
+  },
   "dependencies": {
     "body-parser": "^1.14.1",
     "express": "^4.13.3",
@@ -17,8 +34,12 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
+    "blanket": "^1.2.1",
+    "coveralls": "^2.11.4",
     "expect.js": "^0.3.1",
     "mocha": "^2.3.4",
+    "mocha-lcov-reporter": "^1.0.0",
+    "nock": "^3.3.2",
     "superagent": "^1.5.0",
     "supertest": "^1.1.0"
   }

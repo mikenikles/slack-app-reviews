@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var expect = require('expect.js');
 var supertest = require('supertest');
+var nock = require('nock');
 var app = require('../index');
 
 var teamDomain = 'test-team-domain';
@@ -21,8 +22,10 @@ var testRequestTemplate = {
 };
 
 describe('API', function() {
-
   var request = supertest(app);
+  var nockiTunes = nock('https://itunes.apple.com')
+    .get('/rss/customerreviews/id=400274934/json')
+    .reply(200, require('./mock-itunes-response'));
 
   before('remove test settings', function(done) {
     request
@@ -31,10 +34,11 @@ describe('API', function() {
         team_domain: teamDomain
       })
       .expect(200, 'Team settings successfully deleted.')
-      .end(function(err, res){
-      if (err) throw err;
-      done();
-    });
+      .end(function(err, res) {
+        console.log('------------------------------------');
+        if (err) throw err;
+        done();
+      });
   });
 
   it('returns 200 status', function(done) {
@@ -54,9 +58,8 @@ describe('API', function() {
   });
 
   it('persists app IDs successfully', function(done) {
-    var testRequest = _.extend(testRequestTemplate, {
-      text: 'add 123,456,789'
-    });
+    var testRequest = _.clone(testRequestTemplate);
+    testRequest.text = 'add 400274934';
     request
       .post('/app-review')
       .send(testRequest)
@@ -67,22 +70,20 @@ describe('API', function() {
   });
 
   it('lists app IDs successfully', function(done) {
-    var testRequest = _.extend(testRequestTemplate, {
-      text: 'list'
-    });
+    var testRequest = _.clone(testRequestTemplate);
+    testRequest.text = 'list';
     request
       .post('/app-review')
       .send(testRequest)
       .expect({
         response_type: 'in_channel',
-        text: 'Your team has the following app IDs configured:\n123\n456\n789'
+        text: 'Your team has the following app IDs configured:\n400274934'
       }, done);
   });
 
   it('sets a valid config value', function(done) {
-    var testRequest = _.extend(testRequestTemplate, {
-      text: 'set minRating=2'
-    });
+    var testRequest = _.clone(testRequestTemplate);
+    testRequest.text = 'set minRating=2';
     request
       .post('/app-review')
       .send(testRequest)
@@ -93,9 +94,8 @@ describe('API', function() {
   });
 
   it('cannot set an invalid config value', function(done) {
-    var testRequest = _.extend(testRequestTemplate, {
-      text: 'set invalid=2'
-    });
+    var testRequest = _.clone(testRequestTemplate);
+    testRequest.text = 'set invalid=2';
     request
       .post('/app-review')
       .send(testRequest)
@@ -104,4 +104,30 @@ describe('API', function() {
         text: 'Invalid config key.'
       }, done);
   });
+
+  it('loads a review successfully', function(done) {
+    request
+      .post('/app-review')
+      .send(testRequestTemplate)
+      .expect(function(res) {
+        res.body.response_type = 'in_channel';
+        expect(res.body.text).to.not.be('');
+      })
+      .end(done);
+  });
+
+  it('returns a 404 when the iTunes API is not available', function(done) {
+    var nockiTunes = nock('https://itunes.apple.com')
+      .get('/rss/customerreviews/id=400274934/json')
+      .reply(404);
+    request
+      .post('/app-review')
+      .send(testRequestTemplate)
+      .expect(function(res) {
+        res.body.response_type = 'in_channel';
+        expect(res.body.text).to.be(404);
+      })
+      .end(done);
+  });
+
 });

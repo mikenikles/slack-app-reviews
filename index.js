@@ -6,6 +6,12 @@ var Parse = require('parse/node');
 var config = require('./config.json');
 var configKeyWhitelist = ['minRating', 'maxRating'];
 
+var log = function(msg) {
+  if (process.env.NODE_ENV == 'production') {
+    console.log(msg);
+  }
+};
+
 var loadReviewFromItunes = function(teamSettings, successCallback, errorCallback) {
   var appIdList = teamSettings.get('appIdList');
   var minRating = teamSettings.get('minRating') || 1;
@@ -51,9 +57,11 @@ var loadReviewFromItunes = function(teamSettings, successCallback, errorCallback
           successCallback(slackMessage);
         } else {
           var errorMessage = 'No reviews for app: ' + (appName ? appName : randomAppId);
-          console.log(errorMessage);
+          log(errorMessage);
           errorCallback(errorMessage);
         }
+      } else {
+        errorCallback(response.statusCode);
       }
     }
   );
@@ -77,7 +85,7 @@ var persistTeamSettings = function(slackCommand, teamDomain, appIdList, successC
           error: function(persistedTeamSettings, error) {
             // Execute any logic that should take place if the save fails.
             // error is a Parse.Error with an error code and message.
-            console.log('Failed to create new object, with error code: ' + error.message);
+            log('Failed to create new object, with error code: ' + error.message);
             errorCallback('Failed to create new object, with error code: ' + error.message);
           }
         });
@@ -91,12 +99,12 @@ var persistTeamSettings = function(slackCommand, teamDomain, appIdList, successC
         successCallback('Success! Your app IDs are persisted. From now on, use `' + slackCommand + '` to get a random review.');
         // More than 1 settings entry for the given team... problem
       } else {
-        console.log('More than 1 settings entry for team: ' + teamDomain);
+        log('More than 1 settings entry for team: ' + teamDomain);
         errorCallback('Something went wrong... Please try again');
       }
     },
     error: function(error) {
-      console.log('Cannot load team settings for team: ' + teamDomain + '. Error: ' + error);
+      log('Cannot load team settings for team: ' + teamDomain + '. Error: ' + error);
       errorCallback('Something went wrong... Please try again');
     }
   });
@@ -118,12 +126,12 @@ var listTeamSettings = function(slackCommand, teamDomain, successCallback, error
         });
         successCallback('Your team has the following app IDs configured:\n' + message);
       } else {
-        console.log('0 or more than 1 settings entry for team: ' + teamDomain);
+        log('0 or more than 1 settings entry for team: ' + teamDomain);
         errorCallback('Something went wrong... Please try again');
       }
     },
     error: function(error) {
-      console.log('Cannot load team settings for team: ' + teamDomain + '. Error: ' + error);
+      log('Cannot load team settings for team: ' + teamDomain + '. Error: ' + error);
       errorCallback('Something went wrong... Please try again');
     }
   });
@@ -149,12 +157,12 @@ var setTeamSettingsConfigValue = function(teamDomain, configKey, configValue, su
             error: function(persistedTeamSettings, error) {
               // Execute any logic that should take place if the save fails.
               // error is a Parse.Error with an error code and message.
-              console.log('Failed to create new object, with error code: ' + error.message);
+              log('Failed to create new object, with error code: ' + error.message);
               errorCallback('Failed to create new object, with error code: ' + error.message);
             }
           });
         } else {
-          console.log('Invalid config key provided: ' + configKey + '; team: ' + teamDomain);
+          log('Invalid config key provided: ' + configKey + '; team: ' + teamDomain);
           errorCallback('Invalid config key.')
         }
         // Settings available, update
@@ -164,17 +172,17 @@ var setTeamSettingsConfigValue = function(teamDomain, configKey, configValue, su
           results[0].save();
           successCallback('Success! Your settings are persisted.');
         } else {
-          console.log('Invalid config key provided: ' + configKey + '; team: ' + teamDomain);
+          log('Invalid config key provided: ' + configKey + '; team: ' + teamDomain);
           errorCallback('Invalid config key.')
         }
         // More than 1 settings entry for the given team... problem
       } else {
-        console.log('More than 1 settings entry for team: ' + teamDomain);
+        log('More than 1 settings entry for team: ' + teamDomain);
         errorCallback('Something went wrong... Please try again');
       }
     },
     error: function(error) {
-      console.log('Cannot load team settings for team: ' + teamDomain + '. Error: ' + error);
+      log('Cannot load team settings for team: ' + teamDomain + '. Error: ' + error);
       errorCallback('Something went wrong... Please try again');
     }
   });
@@ -240,10 +248,12 @@ app.delete('/remove-test-settings', function(req, res) {
             res.send('Team settings could not be deleted due to: ' + error);
           }
         });
+      } else {
+        res.send('Team settings successfully deleted.');
       }
     },
     error: function(error) {
-      console.log('Cannot delete team settings for team: ' + teamDomain + '. Error: ' + error);
+      log('Cannot delete team settings for team: ' + teamDomain + '. Error: ' + error);
       res.send('Something went wrong... Please try again');
     }
   });
@@ -254,7 +264,7 @@ app.post('/app-review', function(req, res) {
   var user = req.body.user_name;
   var slackCommand = req.body.command;
   var parameters = req.body.text;
-  console.log('Team: ' + teamDomain + '; user: ' + user + '; Slack command: ' + slackCommand + '; parameters: ' + parameters);
+  log('Team: ' + teamDomain + '; user: ' + user + '; Slack command: ' + slackCommand + '; parameters: ' + parameters);
 
   // Load team settings
   var TeamSettings = Parse.Object.extend('TeamSettings');
@@ -299,12 +309,12 @@ app.post('/app-review', function(req, res) {
           }
         }
       } else {
-        console.log('More than 1 settings entry for team: ' + teamDomain);
+        log('More than 1 settings entry for team: ' + teamDomain);
         sendSlackResponse(res, 'Hey there ' + user + '! Something went wrong... Please try again');
       }
     },
     error: function(error) {
-      console.log('Cannot load team settings for team: ' + teamDomain + '. Error: ' + error);
+      log('Cannot load team settings for team: ' + teamDomain + '. Error: ' + error);
       sendSlackResponse(res, 'Hey there ' + user + '! Something went wrong... Please try again');
     }
   });
