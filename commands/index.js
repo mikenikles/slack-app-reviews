@@ -2,5 +2,6 @@ module.exports = {
   add: require('./add'),
   help: require('./help'),
   list: require('./list'),
-  set: require('./set')
+  set: require('./set'),
+  remove: require('./remove')
 }

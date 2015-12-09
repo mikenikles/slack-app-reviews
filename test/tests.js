@@ -65,7 +65,7 @@ describe('API', function() {
 
   it('persists app IDs successfully', function(done) {
     var testRequest = _.clone(testRequestTemplate);
-    testRequest.text = 'add 400274934';
+    testRequest.text = 'add 400274934,123';
     request
       .post('/app-review')
       .send(testRequest)
@@ -76,6 +76,30 @@ describe('API', function() {
   });
 
   it('lists app IDs successfully', function(done) {
+    var testRequest = _.clone(testRequestTemplate);
+    testRequest.text = 'list';
+    request
+      .post('/app-review')
+      .send(testRequest)
+      .expect({
+        response_type: 'in_channel',
+        text: 'Your team has the following app IDs configured:\n123\n400274934'
+      }, done);
+  });
+
+  it('remove app ID successfully', function(done) {
+    var testRequest = _.clone(testRequestTemplate);
+    testRequest.text = 'remove 123';
+    request
+      .post('/app-review')
+      .send(testRequest)
+      .expect({
+        response_type: 'in_channel',
+        text: 'Success! Your app ID got removed.'
+      }, done);
+  });
+
+  it('lists app IDs successfully after remove', function(done) {
     var testRequest = _.clone(testRequestTemplate);
     testRequest.text = 'list';
     request
