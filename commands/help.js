@@ -2,7 +2,7 @@ var help = function(slackCommand, successCallback) {
   var helpMessage = 'Welcome to `slack-app-reviews`!\n\n' +
     'Usage: `' + slackCommand + ' [<command>]`\n\n' +
     'where `<command>` is one of:\n' +
-    '    `add`, `list`, `set`, `help`\n\n' +
+    '    `add`, `remove`, `list`, `set`, `help`\n\n' +
     '`' + slackCommand + '                          ` Displays a random review\n' +
     '`' + slackCommand + ' add <list of app IDs>    ` A comma separated list of app IDs from iTunes Connect\n' +
     '`' + slackCommand + ' remove <list of app IDs> ` A comma separated list of app IDs to remove\n' +
